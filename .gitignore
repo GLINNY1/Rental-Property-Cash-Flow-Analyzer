@@ -1,6 +1,6 @@
 # Exceed GitHub 100 MB limit — keep locally or use Git LFS / release assets
 inputData/zillowHomeValues/zhvi_by_ZIP_Code.csv
-inputData/realtor-data.zip.csv
+inputData/realtor-data_zip.csv
 
 # Environment variables (API keys - never commit these)
 .env
