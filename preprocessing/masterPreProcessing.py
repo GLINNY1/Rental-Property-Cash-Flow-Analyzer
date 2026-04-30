@@ -401,6 +401,8 @@ for group_name, cols in groups.items():
             print(f"  {col:<35} {non_null:>10,} {pct_missing:>9.1f}%")
 
 
+master["prop_price_to_rent"] = master["price"] / (master["best_rent_estimate"] * 12)
+master["prop_gross_yield"]   = (master["best_rent_estimate"] * 12) / master["price"]
 # =============================================================================
 # SAVE
 # =============================================================================
