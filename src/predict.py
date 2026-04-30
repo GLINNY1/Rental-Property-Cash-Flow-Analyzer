@@ -23,6 +23,7 @@ import pandas as pd
 import numpy as np
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
+# Resolve project root reliably for script and notebook execution.
 def _get_root_dir():
     try:
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -75,6 +76,7 @@ MAINTENANCE_PCT = 0.01   # 1% of home value/year (standard rule of thumb)
 MGMT_PCT        = 0.08   # 8% of rent/year for property management
 
 
+# Load trained models, scaler, and expected feature list from disk.
 def load_models():
     print("  Loading models...", end=" ", flush=True)
     lr       = joblib.load(os.path.join(OUTPUT_DIR, "model_logistic_regression.pkl"))
@@ -86,6 +88,7 @@ def load_models():
     return lr, dt, nn, scaler, features
 
 
+# Load Zillow/Census feature tables and normalize ZIP code formats.
 def load_market_data():
     print("  Loading market data...", end=" ", flush=True)
     zip_df    = pd.read_csv(os.path.join(OUTPUT_DIR, "zillow_zip_features.csv"),
@@ -100,6 +103,7 @@ def load_market_data():
     return zip_df, metro_df, census_df
 
 
+# Collect and validate property details entered by the user.
 def get_user_input():
     print()
     print("=" * 58)
@@ -153,6 +157,7 @@ def get_user_input():
     return price, beds, baths, sqft, zip_code
 
 
+# Adjust rent estimate by bedroom tier using ZIP-level ZHVI ratios.
 def adjust_rent_for_bedrooms(base_rent, beds, zip_row):
     """
     Scale base rent up/down based on bedroom count using ZHVI tier ratios.
@@ -173,6 +178,7 @@ def adjust_rent_for_bedrooms(base_rent, beds, zip_row):
     return base_rent * fallback.get(beds, 1.0)
 
 
+# Retrieve ZIP/metro/census signals with median-based fallbacks.
 def lookup_market_features(zip_code, zip_df, metro_df, census_df):
     """Look up all market features for a given ZIP code."""
     features = {}
@@ -237,6 +243,7 @@ def lookup_market_features(zip_code, zip_df, metro_df, census_df):
     return features, warnings, zip_row
 
 
+# Compute cash flow metrics for one down-payment scenario.
 def compute_cash_flow(price, beds, monthly_rent, down_pct,
                       vacancy_rate, state_abbr, total_pmt_col, features):
     """
@@ -304,6 +311,7 @@ def compute_cash_flow(price, beds, monthly_rent, down_pct,
     }
 
 
+# Build a model-ready single-row feature frame in training column order.
 def build_feature_row(price, beds, baths, sqft, monthly_rent, market_features, feature_list):
     """Build the feature vector the model expects."""
     annual_rent        = monthly_rent * 12
@@ -328,6 +336,7 @@ def build_feature_row(price, beds, baths, sqft, monthly_rent, market_features, f
     return X
 
 
+# Run all trained models and return class predictions plus probabilities.
 def run_models(price, beds, baths, sqft, monthly_rent, market_features,
                lr, dt, nn, scaler, feature_list):
     """Run all three models and return predictions."""
@@ -347,6 +356,7 @@ def run_models(price, beds, baths, sqft, monthly_rent, market_features,
     return results
 
 
+# Print market context, cash flow scenarios, model outputs, and verdict.
 def print_report(price, beds, baths, sqft, zip_code,
                  market_features, zip_row, warnings,
                  monthly_rent, model_results,
@@ -458,6 +468,7 @@ def print_report(price, beds, baths, sqft, zip_code,
     print("=" * 58)
 
 
+# Orchestrate user input, feature lookup, inference, and reporting loop.
 def main():
     print()
     print("=" * 58)
